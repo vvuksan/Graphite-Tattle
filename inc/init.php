@@ -14,7 +14,7 @@ $tmpl = new fTemplating(VIEW_PATH);
 
 
 if (!is_dir(JS_CACHE) || !is_writable(JS_CACHE)){
-  $warning_message .= "JS Caching disabled due to js folder permissions";
+  $warning_message = "JS Caching disabled due to js folder permissions";
 } else {
   $tmpl->enableMinification('development', JS_CACHE, TATTLE_ROOT);
 }
