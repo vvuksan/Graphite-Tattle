@@ -14,7 +14,7 @@ $check =  new Check($check_id);
 
 if ( $GLOBALS['PRIMARY_SOURCE'] == "GANGLIA" ) {
   $parts = explode("_|_", $check->prepareTarget());
-  $url = $GLOBALS['GANGLIA_URL'] . "/graph.php?graphlot=1&cs=-1day&ce=now&c=" . 
+  $url = $GLOBALS['GANGLIA_URL'] . "/graph.php?live=1&cs=-1day&ce=now&c=" . 
   $parts[0] . "&h=" . $parts[1] . "&m=" . $parts[2];
 } else {
   $url = $GLOBALS['GRAPHITE_URL'] . '/graphlot/rawdata?&from=-24hour&until=-0hour' .

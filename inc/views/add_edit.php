@@ -11,32 +11,32 @@ $tmpl->place('header');
   });
 </script>
   <div class="row">
-    <div class="span4">
+    <div class="span8">
       <form class="form-stacked" action="<?=fURL::get(); ?>?action=<?=$action; ?>&check_id=<?=$check_id; ?>" method="post">
         <div class="main" id="main">
           <fieldset>
             <div class="clearfix">
 	      <label for="check-name">Name<em>*</em></label>
               <div class="input">
-	        <input id="check-name" class="span3" type="text" size="30" name="name" value="<?=$check->encodeName(); ?>" />
+	        <input id="check-name" class="span6" type="text" size="30" name="name" value="<?=$check->encodeName(); ?>" />
               </div>
             </div><!-- /clearfix -->
             <div class="clearfix">
 	      <label for="check-target">Graphite Target<em>*</em></label>
               <div class="input">
-                <input id="check-target" class="span3" type="text" size="30" name="target" value="<?=$check->encodeTarget(); ?>" />
+                <input id="check-target" class="span6" type="text" size="30" name="target" value="<?=$check->encodeTarget(); ?>" />
               </div>
             </div><!-- /clearfix -->
 	    <div class="clearfix">
 	      <label for="check-error">Error Threshold<em>*</em></label>
               <div class="input">
-	        <input id="check-error" class="span3" type="text" name="error" value="<?=$check->encodeError(); ?>" />
+	        <input id="check-error" class="span4" type="text" name="error" value="<?=$check->encodeError(); ?>" />
 	      </div>
             </div><!-- /clearfix -->
 	    <div class="clearfix">
 	      <label for="check-warn">Warn Threshold<em>*</em></label>
               <div class="input">
-                <input id="check-warn" class="span3" type="text" name="warn" value="<?=$check->encodeWarn(); ?>" />   
+                <input id="check-warn" class="span4" type="text" name="warn" value="<?=$check->encodeWarn(); ?>" />   
 	      </div>
             </div><!-- /clearfix -->
          </fieldset>
@@ -45,7 +45,7 @@ $tmpl->place('header');
             <div class="clearfix">
               <label for="check-sample">Sample Size<em>*</em></label>
               <div class="input">
-                <select name="check-sample" class="span3">
+                <select name="check-sample" class="span4">
                 <?
                   $statuses = array('-5minutes'   => '5 Minutes', '-10minutes' => '10 Minutes');
                   foreach ($statuses as $value => $text) {

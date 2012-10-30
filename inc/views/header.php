@@ -11,11 +11,18 @@
    <?php
        $this->place('css');  
        $this->place('js'); 
-    if ($this->get('graphlot')) { ?>
-    <script type="text/javascript" src="<?=$GLOBALS['GRAPHITE_URL']; ?>/content/js/jquery.flot.js"></script>
-    <script type="text/javascript" src="<?=$GLOBALS['GRAPHITE_URL']; ?>/content/js/jquery.autocomplete.js"></script>
-    <script type="text/javascript" src="<?=$GLOBALS['GRAPHITE_URL']; ?>/content/js/jquery.flot.selection.js"></script>
-    <script type="text/javascript" src="<?=$GLOBALS['GRAPHITE_URL']; ?>/content/js/jquery.flot.crosshair.js"></script>
+    if ($this->get('graphlot')) {
+      if ( $GLOBALS['PRIMARY_SOURCE'] == "GANGLIA" ) {
+	$flot_url = $GLOBALS['GANGLIA_URL'];
+      } else {
+	$flot_url = $GLOBALS['GRAPHITE_URL'] . "/content";
+      }
+    
+    ?>
+    <script type="text/javascript" src="<?=$flot_url ?>/js/jquery.flot.js"></script>
+    <script type="text/javascript" src="<?=$flot_url ?>/js/jquery.autocomplete.js"></script>
+    <script type="text/javascript" src="<?=$flot_url ?>/js/jquery.flot.selection.js"></script>
+    <script type="text/javascript" src="<?=$flot_url ?>/js/jquery.flot.crosshair.js"></script>
     <script type="text/javascript">
 
     $(document).ready(function () {

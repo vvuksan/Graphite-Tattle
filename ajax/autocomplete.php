@@ -16,5 +16,6 @@ if ($GLOBALS['PRIMARY_SOURCE'] == 'GANGLIA') {
   foreach ($directories as $directory) {
     $return_arr[] = array('value' => str_replace('.wsp','',str_replace('/','.',str_replace($GLOBALS['WHISPER_DIR'],'',$directory->getPath()))));
   }
+  
   print json_encode($return_arr);
 }

@@ -97,10 +97,14 @@ class Check extends fActiveRecord
 	static public function getData($obj=NULL)
 	{
           if ( $GLOBALS['PRIMARY_SOURCE'] == "GANGLIA" ) {
-            $check_url = $GLOBALS['GANGLIA_URL'] . '/graph.php/?' .
-                        'target=' . $obj->prepareTarget() . 
+	    $pieces = explode("_|_", $obj->prepareTarget());
+	    $cluster = $pieces[0];
+	    $hostname = $pieces[1];
+	    $metric = $pieces[2];
+            $check_url = $GLOBALS['GANGLIA_URL'] . '/graph.php?' .
+                        'c=' . $cluster . '&h=' . $hostname . '&m=' . $metric . 
                         '&cs='. $obj->prepareSample() . 
-                        '&ce=now&format=json';
+                        '&ce=now&live=1';
           } else {
             $check_url = $GLOBALS['GRAPHITE_URL'] . '/render/?' .
                         'target=' . $obj->prepareTarget() . 
