@@ -1,9 +1,10 @@
 <?php
 
 // DATABASE SETTINGS
-$GLOBALS['DATABASE_NAME'] = 'graphite_tattle';
-$GLOBALS['DATABASE_USER'] = 'root';
-$GLOBALS['DATABASE_PASS'] = '';
+$GLOBALS['DATABASE_HOST'] = '127.0.0.1';
+$GLOBALS['DATABASE_NAME'] = 'tattle';
+$GLOBALS['DATABASE_USER'] = 'dbuser';
+$GLOBALS['DATABASE_PASS'] = 'dbpass';
 
 // GRAPHITE and GANGLIA Settings
 $GLOBALS['PRIMARY_SOURCE'] = 'GRAPHITE'; //Currently can be GRAPHITE or GANGLIA
@@ -24,6 +25,14 @@ $GLOBALS['SESSION_FILES'] = '/tmp';
 // Bootstrap Settings
 $GLOBALS['BOOTSTRAP_PATH'] = '/bootstrap/';
 
+// Allow HTTP auth as user management 
+$GLOBALS['ALLOW_HTTP_AUTH'] = false;
+
+// Number of elements per page (checks, alerts, subscriptions)
+$GLOBALS['PAGE_SIZE'] = 15;
+
+// Locale settings
+$GLOBALS['TIMEZONE'] = 'America/New_York';
 
 // Allow loading GLOBAL overrides
 if(file_exists(  TATTLE_ROOT . "/inc/config.override.php" ) ) {
@@ -31,23 +40,11 @@ if(file_exists(  TATTLE_ROOT . "/inc/config.override.php" ) ) {
 }
 
 //Load in plugin files
-$plugin_settings = array();
+
+$GLOBALS['hooks'] = array();
+
 foreach (glob("plugins/*_plugin.php") as $plugin) {
   include_once($plugin);
-  $plugin_name = str_replace(array('plugins/', '_plugin.php'), '', $plugin);
-  $plugin_config = $plugin_name . '_config';
-  $plugin_engine = $plugin_name . '_engine';
-  $plugin_notify = $plugin_name . '_notify';
-
-  if (function_exists($plugin_config)) {
-    $plugin_settings[$plugin_name] = $plugin_config();
-    if (function_exists($plugin_notify)) {
-      $send_methods[$plugin_name] = $plugin_settings[$plugin_name]['name'];
-    }
-    if (function_exists($plugin_engine)) {
-      $data_engine[$plugin_name] = $plugin_settings[$plugin_name]['name'];
-    }
-  }
 }
 
 // Check to make sure the session folder exists 
@@ -56,7 +53,7 @@ $config_exit = false;
 
 try {
   //Set DB connection (using flourish it isn't actually connected to until the first use)
-  $mysql_db  = new fDatabase('mysql', $GLOBALS['DATABASE_NAME'],$GLOBALS['DATABASE_USER'], $GLOBALS['DATABASE_PASS']);
+  $mysql_db  = new fDatabase('mysql', $GLOBALS['DATABASE_NAME'], $GLOBALS['DATABASE_USER'], $GLOBALS['DATABASE_PASS'], $GLOBALS['DATABASE_HOST']);
   // Please note that calling this method is not required, and simply
   // causes an exception to be thrown if the connection can not be made
   $mysql_db->connect();
@@ -69,6 +66,17 @@ try {
 fORMDatabase::attach($mysql_db);
 
 
+$default_plugin_settings = plugin_hook('plugin_settings');
+$default_plugin_user_settings = plugin_hook('plugin_user_settings');
+
+$send_methods = plugin_hook('send_methods');
+$current_plugin_settings = Setting::findAll(array('type=' => 'system'));
+$plugin_settings = $default_plugin_settings;
+$plugin_user_settings = $default_plugin_user_settings;
+
+foreach ($current_plugin_settings as $setting) {
+  $plugin_settings[$setting->getName()]['value'] = $setting->getValue();
+}
 
 if (!is_dir(JS_CACHE)) {
   $config_error .="<br/>Tattle Error <br />" .
@@ -76,7 +84,7 @@ if (!is_dir(JS_CACHE)) {
 }
 
 if (!is_dir($GLOBALS['SESSION_FILES']) || !is_writable($GLOBALS['SESSION_FILES'])){
-  $config_error .="<br/>Tattle Error <br />" .
+ $config_error .="<br/>Tattle Error <br />" .
                   "Flourishlib Session path is not write-able. Path at : " . $GLOBALS['SESSION_FILES'];
   $config_error = true;
 }
@@ -97,7 +105,7 @@ error_reporting(E_STRICT | E_ALL);
 fCore::enableErrorHandling('html');
 fCore::enableExceptionHandling('html');
 
-fTimestamp::setDefaultTimezone('America/New_York');
+fTimestamp::setDefaultTimezone($GLOBALS['TIMEZONE']);
 
 fAuthorization::setLoginPage(User::makeURL('login'));
 fAuthorization::setAuthLevels(
@@ -109,3 +117,25 @@ fAuthorization::setAuthLevels(
 // This prevents cross-site session transfer
 fSession::setPath($GLOBALS['SESSION_FILES']);
 
+
+if (!fAuthorization::checkLoggedIn()) {
+  if ($GLOBALS['ALLOW_HTTP_AUTH'] && (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW']))) {
+    unset($_SERVER['PHP_AUTH_PW']); //no need for a clear text password hanging around.
+    try {
+      $user = new User(array('username' => $_SERVER['PHP_AUTH_USER']));
+      // Auto Register User
+      fAuthorization::setUserToken($user->getEmail());
+      fAuthorization::setUserAuthLevel($user->getRole());
+      fSession::set('user_id',$user->getUserId());
+      fSession::set('user_name',$user->getUsername());
+    } catch (fNotFoundException $e) {
+
+       if (fURL::getWithQueryString() != (TATTLE_WEB_ROOT . User::makeURL('add'))) {
+        fMessaging::create('affected', User::makeURL('add'), $_SERVER['PHP_AUTH_USER'] );
+        fMessaging::create('success', User::makeURL('add'),
+                         'The user ' . $_SERVER['PHP_AUTH_USER'] . ' was successfully created');
+        fURL::redirect(User::makeURL('add')); 
+     } 
+    }    
+  }
+}

@@ -44,18 +44,14 @@ Installation and Configuration
 
 * Create a session storage folder for flourishlib
 
-* Create JS/CSS minification directory and allow Apache to write to it. By default this is 
-   /js_cache e.g.
-
-    ```install -o www-data /var/www/js_cache/images```
-
 * Create a file called inc/config.override.php so that upgrades don't blow away your config
   
     ```
     <?
-    $GLOBALS['DATABASE_NAME'] = 'graphite_tattle';
-    $GLOBALS['DATABASE_USER'] = 'tattle';
-    $GLOBALS['DATABASE_PASS'] = 'yoyoyo';
+    $GLOBALS['DATABASE_HOST'] = '127.0.0.1';
+    $GLOBALS['DATABASE_NAME'] = 'tattle';
+    $GLOBALS['DATABASE_USER'] = 'dbuser';
+    $GLOBALS['DATABASE_PASS'] = 'dbpass';
     $GLOBALS['GRAPHITE_URL'] = 'http://graph';
     ```
 
@@ -64,6 +60,9 @@ Installation and Configuration
 * Setup cronjob to to run processor.php. This file can be run either as a cli or through the web server. (cli maybe required depending on your plugins and their required permissions)
 
 * Register via the web interface. (The first user registered is the admin currently prior to us implementing any roles, and other permissions)
+
+
+If you are on EL6 or a recent Fedora , make sure your php.ini has short_open_tag = off commented or you will get bogus output.
 
 Dashboard Cleanurls
 -----------
@@ -78,6 +77,14 @@ The second parameter should be replaced with the dashboard id you want to see.
 The third parameter represents the heigt of the individual graphs.
 The fourth parameter represents the width of the individual graphs
 
+HTTP Auth Based User Accounts
+-----------
+If you are already using Web Server based authentication, then you can tell Tattle to use those credentials instead of keeping two sets of user accounts.
+
+just set the following config variable to true in your config.override.php file:
+```
+$GLOBALS['ALLOW_HTTP_AUTH'] = true;
+```
 
 Reason for creation
 -----------
@@ -92,6 +99,8 @@ Caution!
 ----------
 This project is still in an Alpha status and not feature complete or ready for full production use yet.
 Any help smoothing out the edges and adding additional features / functions would be greatly appreciated!
+
+If you're having strange SQL issues, make sure you are using the most recent schema
 
 How to Contribute
 ---------------------

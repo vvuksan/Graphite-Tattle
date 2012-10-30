@@ -1,8 +1,14 @@
 <?
 // Include main class loading config file
 define('TATTLE_ROOT', str_replace(array('ajax'),'',getcwd()));
+$web_root = dirname($_SERVER['PHP_SELF']);
+if ($web_root != '/') {
+  $web_root .= '/';
+}
+define('TATTLE_WEB_ROOT',$web_root);
 define('VIEW_PATH', TATTLE_ROOT . '/inc/views/');
 define('JS_CACHE', TATTLE_ROOT . '/js_cache/');
+
 
 include TATTLE_ROOT . '/inc/includes.php';
 include TATTLE_ROOT . '/inc/functions.php';
@@ -26,9 +32,9 @@ $tmpl->add('js','assets/js/jquery-ui.min.js');
 $tmpl->add('js','assets/js/jquery.collapsible.js'); 
 $tmpl->add('js','assets/js/jquery.graphite.js');
 
-$tmpl->add('js','/bootstrap/js/bootstrap-modal.js');
-$tmpl->add('js','/bootstrap/js/bootstrap-twipsy.js');
-$tmpl->add('js','/bootstrap/js/bootstrap-popover.js');
+$tmpl->add('js','bootstrap/js/bootstrap-modal.js');
+$tmpl->add('js','bootstrap/js/bootstrap-twipsy.js');
+$tmpl->add('js','bootstrap/js/bootstrap-popover.js');
 
 
 $tmpl->set('header', 'header.php');
